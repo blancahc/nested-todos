@@ -4,14 +4,17 @@
   <link rel="stylesheet" type="text/css" href="nested-todos.css">
   </head>
   <body>
-    
+    <script src="nested-todos.js"></script>
     <!-- <script src="tinytest.js"></script>
     <script src="tests.js"></script> -->
-    <h1>My Todos</h1>
+    <h1 class='center' >My Todos</h1>
     <!-- to imitate Workflowy, how do I make the input look like a bullet -->
-    <input id="new-todo" type="text" placeholder="What's your todo?" autofocus>
-      <ul id='display-todos'> 
+    <input class='input' type="text">
+    <div>
+      <ul> 
+        <li>First Todo</li>
+        <input class='input' type="text">
       </ul>
-      <script src="nested-todos.js"></script>
+    </div>
   </body>
 </html>
