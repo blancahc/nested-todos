@@ -1,8 +1,5 @@
-//11/21 update
-  //added a working delete button for each todo
-  //removed the "Add Todo" button from the top and instead allowed for the user to create a new todo upon hitting enter in the top text input field.
-  //added "Edit" button to each todo, which displays a text input underneath the todo. 
-//Need to figure out how to hide the input field if the user clicks away from the edit input field. 
+//WHAT TO DO NEXT:
+//add function for adding a subtodo 
 var todos = [];
 function addTodo(todoText) {
   todos.push({todoText: todoText, completed: false})
@@ -31,7 +28,8 @@ function displayTodos() {
     todoLi.appendChild(createDeleteButton());
     todoLi.appendChild(createEditButton());
     todoLi.appendChild(createAddSubTodoButton());
-    todoLi.appendChild(createInputField());
+    todoLi.appendChild(createEditInputField());
+    todoLi.appendChild(createSubTodoInputField());
     todosUl.appendChild(todoLi);
   })
 }
@@ -55,35 +53,76 @@ function createAddSubTodoButton() {
   addSubTodoButton.className = 'addSubTodoButton';
   return addSubTodoButton;
 }
-function createInputField() {
+function createEditInputField() {
+  var inputfield = document.createElement('input');
+  inputfield.type = 'text';
+  inputfield.className = 'editTodoInput';
+  inputfield.placeholder = 'Type something and hit `Enter`'
+  inputfield.style.display = 'none';
+  return inputfield;
+}
+function createSubTodoInputField() {
   var inputfield = document.createElement('input');
   inputfield.type = 'text';
   inputfield.className = 'subTodoInput';
+  inputfield.placeholder = 'Type something and hit `Enter`'
   inputfield.style.display = 'none';
   return inputfield;
 }
 //EVENT LISTENERS
-var todoTextInput = document.getElementById("new-todo");
-todoTextInput.addEventListener('keyup', function(event){
+var editTextInput = document.getElementById("new-todo");
+editTextInput.addEventListener('keyup', function(event){
   //save todo if you press Enter and have more than one input.value
   if(event.code === 'Enter'){
-    var trimedInputText = todoTextInput.value.trim();
+    var trimedInputText = editTextInput.value.trim();
     if(trimedInputText.length > 0){
       addTodo(trimedInputText);
-      todoTextInput.value = '';
+      editTextInput.value = '';
     }  
   }
 });
-function displaySubTodoInput(id){
+function clickedEditTodo(id){
   var liId= id;
   var li = document.getElementById(liId);
   var input = li.childNodes[4]
   input.style.display='block';
+  input.style.width = '300px';
   input.focus();
   if(input.addEventListener('blur', function (event){
     input.style.display = 'none';
   }));
+  if(input.addEventListener('keyup', function (event){
+    if(event.code === 'Enter'){
+      var trimedInputText = input.value.trim();
+      if(trimedInputText.length > 0){
+        editTodo(liId, trimedInputText);
+        input.value = '';
+      }  
+    }
+  }));
 };
+function clickedAddSubTodo(id){
+  var liId= id;
+  var li = document.getElementById(liId);
+  var input = li.childNodes[5]
+  input.style.display='block';
+  input.style.width = '300px';
+  input.focus();
+  if(input.addEventListener('blur', function (event){
+    input.style.display = 'none';
+  }));
+  if(input.addEventListener('keyup', function (event){
+    if(event.code === 'Enter'){
+      var trimedInputText = input.value.trim();
+      if(trimedInputText.length > 0){
+        //add function here
+        console.log('added' + trimedInputText);
+        input.value = '';
+      }  
+    }
+  }));
+};
+
 var todosUl = document.getElementById('display-todos');
 todosUl.addEventListener('click', function(event) {
  //get element that was clicked
@@ -95,10 +134,9 @@ todosUl.addEventListener('click', function(event) {
  }
  //check if elementClicked is an edit button
  if(elementClicked.className === 'editButton') {
-  //  editEvent(parseInt(elementClicked.parentNode.id));
-  displaySubTodoInput(elementClicked.parentNode.id);
+  clickedEditTodo(elementClicked.parentNode.id);
  }
  if(elementClicked.className === 'addSubTodoButton'){
-  displaySubTodoInput(elementClicked.parentNode.id);
+  clickedAddSubTodo(elementClicked.parentNode.id);
  }
 });
