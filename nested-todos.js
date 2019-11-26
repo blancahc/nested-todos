@@ -1,5 +1,6 @@
 //WHAT TO DO NEXT:
-//add function for adding a subtodo 
+//add function for adding a subtodo (recursion)
+//Make it so that editing text field has a pre-determined text of what it used to be
 var todos = [];
 function addTodo(todoText) {
   todos.push({todoText: todoText, completed: false})
@@ -57,7 +58,7 @@ function createEditInputField() {
   var inputfield = document.createElement('input');
   inputfield.type = 'text';
   inputfield.className = 'editTodoInput';
-  inputfield.placeholder = 'Type something and hit `Enter`'
+  // inputfield.placeholder = 'Type something and hit `Enter`'
   inputfield.style.display = 'none';
   return inputfield;
 }
@@ -84,7 +85,9 @@ editTextInput.addEventListener('keyup', function(event){
 function clickedEditTodo(id){
   var liId= id;
   var li = document.getElementById(liId);
-  var input = li.childNodes[4]
+  var input = li.childNodes[4];
+  var todoText = todos[id].todoText;
+  input.value = todoText;
   input.style.display='block';
   input.style.width = '300px';
   input.focus();
