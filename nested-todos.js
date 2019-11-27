@@ -1,7 +1,6 @@
 //WHAT TO DO NEXT:
 //add function for adding a subtodo (recursion)
-//Make it so that editing text field has a pre-determined text of what it used to be
-var todos = [];
+var todos = [{todoText: "one", completed: true}];
 function addTodo(todoText) {
   todos.push({todoText: todoText, completed: false})
   displayTodos();
@@ -21,21 +20,32 @@ function displayTodos() {
   todosUl.innerHTML = '';
   todos.forEach(function(todo, position){
     var todoLi = document.createElement('li');
-    todoLi.innerText = '' + todo.todoText + ' ';
-    if(todo.completed === true){
-      todoLi.classList.add('line-through');
-    }
+    var todoLabel = document.createElement('label');
+    todoLabel.innerText = todo.todoText + ' ';
     todoLi.id = position;
+    todoLi.appendChild(createCheckbox());
+    todoLi.appendChild(todoLabel);
     todoLi.appendChild(createDeleteButton());
     todoLi.appendChild(createEditButton());
     todoLi.appendChild(createAddSubTodoButton());
     todoLi.appendChild(createEditInputField());
     todoLi.appendChild(createSubTodoInputField());
     todosUl.appendChild(todoLi);
+    if(todo.completed === true){
+      todoLi.classList.add('line-through');
+      checkbox = todoLi.childNodes[0];
+      checkbox.checked = true;
+    }
   })
 }
 
 //Create buttons and input field for each todo
+function createCheckbox() {
+  var todoCheckbox = document.createElement('input');
+  todoCheckbox.type = 'checkbox';
+  todoCheckbox.className = 'checkbox';
+  return todoCheckbox;
+}
 function createDeleteButton() {
   var deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete';
@@ -58,7 +68,6 @@ function createEditInputField() {
   var inputfield = document.createElement('input');
   inputfield.type = 'text';
   inputfield.className = 'editTodoInput';
-  // inputfield.placeholder = 'Type something and hit `Enter`'
   inputfield.style.display = 'none';
   return inputfield;
 }
@@ -83,9 +92,8 @@ editTextInput.addEventListener('keyup', function(event){
   }
 });
 function clickedEditTodo(id){
-  var liId= id;
-  var li = document.getElementById(liId);
-  var input = li.childNodes[4];
+  var li = document.getElementById(id);
+  var input = li.childNodes[5];
   var todoText = todos[id].todoText;
   input.value = todoText;
   input.style.display='block';
@@ -98,15 +106,18 @@ function clickedEditTodo(id){
     if(event.code === 'Enter'){
       var trimedInputText = input.value.trim();
       if(trimedInputText.length > 0){
-        editTodo(liId, trimedInputText);
+        editTodo(id, trimedInputText);
         input.value = '';
       }  
     }
   }));
+  if(todos[id].completed === true){
+    checkbox = li.childNodes[0];
+    checkbox.checked = true;
+  }
 };
 function clickedAddSubTodo(id){
-  var liId= id;
-  var li = document.getElementById(liId);
+  var li = document.getElementById(id);
   var input = li.childNodes[5]
   input.style.display='block';
   input.style.width = '300px';
@@ -119,12 +130,25 @@ function clickedAddSubTodo(id){
       var trimedInputText = input.value.trim();
       if(trimedInputText.length > 0){
         //add function here
-        console.log('added' + trimedInputText);
+        console.log('added ' + trimedInputText);
         input.value = '';
       }  
     }
   }));
 };
+function clickedCheckbox(id){
+  var li = document.getElementById(id);
+  var checkbox = li.childNodes[0];
+  if(checkbox.addEventListener('change', function(){
+    if(this.checked) {
+      todos[id].completed = true;
+      li.classList.add('line-through');
+    } else {
+      todos[id].completed = false;
+      li.classList.remove('line-through');
+    }
+  }));
+}
 
 var todosUl = document.getElementById('display-todos');
 todosUl.addEventListener('click', function(event) {
@@ -141,5 +165,8 @@ todosUl.addEventListener('click', function(event) {
  }
  if(elementClicked.className === 'addSubTodoButton'){
   clickedAddSubTodo(elementClicked.parentNode.id);
+ } 
+ if(elementClicked.className === 'checkbox') {
+   clickedCheckbox(elementClicked.parentNode.id)
  }
 });

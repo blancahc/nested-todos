@@ -1,4 +1,22 @@
+#main {
+  width: 70%;
+  margin: auto;
+}
+header {
+  text-align: center;
+}
 
 .line-through {
   text-decoration: line-through;
+}
+#new-todo {
+  display: inline-block;
+  width: 50%;
+  margin: 5% auto;
+  height: 5%;
+}
+ul {
+  margin: 0;
+  padding: 0; 
+  list-style: none;
 }

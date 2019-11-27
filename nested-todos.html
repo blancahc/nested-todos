@@ -7,11 +7,17 @@
     
     <!-- <script src="tinytest.js"></script>
     <script src="tests.js"></script> -->
-    <h1>My Todos</h1>
-    <!-- to imitate Workflowy, how do I make the input look like a bullet -->
-    <input id="new-todo" type="text" placeholder="What's your todo?" autofocus>
+    <div id='main'>
+      <header><h1>My Todos</h1>
+        <!-- to imitate Workflowy, how do I make the input look like a bullet -->
+        <input id="new-todo" type="text" placeholder="What's your todo?" autofocus>
+        <input id="toggle-all" type='checkbox'>
+        <label for="toggle-all">Toggle All</label>
+      </header>
+      
       <ul id='display-todos'> 
       </ul>
+    </div>
       <script src="nested-todos.js"></script>
   </body>
 </html>
