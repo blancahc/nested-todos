@@ -1,17 +1,40 @@
 //WHAT TO DO NEXT:
-//add function for adding a subtodo (recursion)
-var todos = [{todoText: "one", completed: true}];
+//fix toggleAll event Listener
+var todos = [];
+var storage = JSON.parse(localStorage.getItem("current-todos"));
+if(storage.length > 0){
+  todos = storage;
+};
 function addTodo(todoText) {
   todos.push({todoText: todoText, completed: false})
+  localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
+function checkIfAllComplete() {
+  countCompleted = 0;
+ for (var i = 0; i < todos.length; i++){
+  if(todos[i].completed === true) {
+    countCompleted++;
+  }
+ }
+ return countCompleted;
+}
+function checkToggleAllIfAllCompleted() {
+  if (todos.length > 0 && checkIfAllComplete() === todos.length) {
+    toggleAllCheckbox.checked = true;
+  } else {
+    toggleAllCheckbox.checked = false;
+  }
+  }
 
 function deleteTodo(position) {
   todos.splice(position, 1);
+  localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
 function editTodo(position, input) {
   todos[position].todoText = input;
+  localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
 
@@ -142,12 +165,16 @@ function clickedCheckbox(id){
   if(checkbox.addEventListener('change', function(){
     if(this.checked) {
       todos[id].completed = true;
+      localStorage.setItem("current-todos", JSON.stringify(todos));
       li.classList.add('line-through');
     } else {
       todos[id].completed = false;
+      localStorage.setItem("current-todos", JSON.stringify(todos));
       li.classList.remove('line-through');
     }
+    checkToggleAllIfAllCompleted();
   }));
+  
 }
 
 var todosUl = document.getElementById('display-todos');
@@ -170,3 +197,32 @@ todosUl.addEventListener('click', function(event) {
    clickedCheckbox(elementClicked.parentNode.id)
  }
 });
+var toggleAllCheckbox = document.getElementById('toggle-all');
+toggleAllCheckbox.addEventListener('change', function() {
+  //first check if the box is checked
+  if(this.checked){
+    var check = checkIfAllComplete();
+    if(check === todos.length){
+      todos.forEach(function(todo){
+        todo.completed = false;
+        localStorage.setItem("current-todos", JSON.stringify(todos));
+      });
+    } 
+    if (check !== todos.length){
+      todos.forEach(function(todo){
+        todo.completed = true;
+        localStorage.setItem("current-todos", JSON.stringify(todos));
+      })
+    }
+  displayTodos();
+  }
+  if(!this.checked){
+
+  }
+  
+});
+function init() {
+  displayTodos();
+  checkToggleAllIfAllCompleted()
+}
+init();
