@@ -5,7 +5,6 @@
 header {
   text-align: center;
 }
-
 .line-through {
   text-decoration: line-through;
 }
@@ -14,9 +13,25 @@ header {
   width: 50%;
   margin: 5% auto;
   height: 5%;
+  padding: 10px;
 }
 ul {
   margin: 0;
+  text-align: left;
   padding: 0; 
   list-style: none;
+}
+li {
+  display: block;
+  width: 100%;
+}
+button {
+  border: 0;
+  background: none;
+  font-size: 70%;
+  vertical-align: baseline;
+  color: blue;
+}
+.sub-todo {
+margin-left: 5%;
 }

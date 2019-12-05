@@ -10,6 +10,30 @@ function addTodo(todoText) {
   localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
+function addSubTodo(element, text){
+    var whereToAddTodo = whereToAdd(element);
+    whereToAddTodo = eval(whereToAddTodo);
+    if(!whereToAddTodo.subTodos) {
+      whereToAddTodo.subTodos = [];
+    }
+    whereToAddTodo.subTodos.push({todoText: text, completed: false}); 
+    localStorage.setItem("current-todos", JSON.stringify(todos));
+    displayTodos();
+  }
+  function whereToAdd(element) {
+    //base case, if no className
+    var trace = [];
+    var li = element.parentElement;
+    if(!li.className){
+      trace.unshift(`todos[${li.id}]`);
+    }
+    // if(element.parentElement.className === 'sub-todo') {
+    //   trace = whereToAdd(element);
+    // }
+    //add recursion for if parentElement does have a class name of sub-todo
+    return trace.join('.');
+  }
+
 function checkIfAllComplete() {
   countCompleted = 0;
  for (var i = 0; i < todos.length; i++){
@@ -59,6 +83,28 @@ function displayTodos() {
       checkbox = todoLi.childNodes[0];
       checkbox.checked = true;
     }
+    if(todo.subTodos && todo.subTodos.length > 0){
+      todo.subTodos.forEach(function(todo, position){
+        var todoLi = document.createElement('li');
+        todoLi.className= 'sub-todo';
+        var todoLabel = document.createElement('label');
+        todoLabel.innerText = todo.todoText + ' ';
+        todoLi.id = position;
+        todoLi.appendChild(createCheckbox());
+        todoLi.appendChild(todoLabel);
+        todoLi.appendChild(createDeleteButton());
+        todoLi.appendChild(createEditButton());
+        todoLi.appendChild(createAddSubTodoButton());
+        todoLi.appendChild(createEditInputField());
+        todoLi.appendChild(createSubTodoInputField());
+        todosUl.appendChild(todoLi);
+        if(todo.completed === true){
+          todoLi.classList.add('line-through');
+          checkbox = todoLi.childNodes[0];
+          checkbox.checked = true;
+        }
+          })
+    }
   })
 }
 
@@ -71,7 +117,7 @@ function createCheckbox() {
 }
 function createDeleteButton() {
   var deleteButton = document.createElement('button');
-  deleteButton.textContent = 'Delete';
+  deleteButton.textContent = 'X';
   deleteButton.className = 'deleteButton'
   return deleteButton;
 }
@@ -83,7 +129,7 @@ function createEditButton() {
 }
 function createAddSubTodoButton() {
   var addSubTodoButton = document.createElement('button');
-  addSubTodoButton.textContent = 'Add sub todo';
+  addSubTodoButton.textContent = '+';
   addSubTodoButton.className = 'addSubTodoButton';
   return addSubTodoButton;
 }
@@ -139,9 +185,9 @@ function clickedEditTodo(id){
     checkbox.checked = true;
   }
 };
-function clickedAddSubTodo(id){
-  var li = document.getElementById(id);
-  var input = li.childNodes[5]
+function clickedAddSubTodo(element){
+  // var li = document.getElementById(id);
+  var input = element.parentElement.childNodes[6]
   input.style.display='block';
   input.style.width = '300px';
   input.focus();
@@ -153,7 +199,7 @@ function clickedAddSubTodo(id){
       var trimedInputText = input.value.trim();
       if(trimedInputText.length > 0){
         //add function here
-        console.log('added ' + trimedInputText);
+        addSubTodo(element, trimedInputText);
         input.value = '';
       }  
     }
@@ -191,14 +237,15 @@ todosUl.addEventListener('click', function(event) {
   clickedEditTodo(elementClicked.parentNode.id);
  }
  if(elementClicked.className === 'addSubTodoButton'){
-  clickedAddSubTodo(elementClicked.parentNode.id);
+  // clickedAddSubTodo(elementClicked.parentNode.id);
+  clickedAddSubTodo(elementClicked);
  } 
  if(elementClicked.className === 'checkbox') {
    clickedCheckbox(elementClicked.parentNode.id)
  }
 });
 var toggleAllCheckbox = document.getElementById('toggle-all');
-toggleAllCheckbox.addEventListener('change', function() {
+toggleAllCheckbox.addEventListener('click', function() {
   //first check if the box is checked
   if(this.checked){
     var check = checkIfAllComplete();
@@ -214,12 +261,23 @@ toggleAllCheckbox.addEventListener('change', function() {
         localStorage.setItem("current-todos", JSON.stringify(todos));
       })
     }
-  displayTodos();
   }
   if(!this.checked){
-
+      var check = checkIfAllComplete();
+    if(check === todos.length){
+      todos.forEach(function(todo){
+        todo.completed = false;
+        localStorage.setItem("current-todos", JSON.stringify(todos));
+      });
+    }
+    if (check !== todos.length){
+      todos.forEach(function(todo){
+        todo.completed = true;
+        localStorage.setItem("current-todos", JSON.stringify(todos));
+      })
+    }
   }
-  
+  displayTodos();
 });
 function init() {
   displayTodos();
