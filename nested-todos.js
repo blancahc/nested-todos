@@ -100,7 +100,7 @@ function displayTodos() {
       var subTodos = todo.subTodos
       displaySubTodos(subTodos, todoLi);
     }
-  })
+  });
 }
  function displaySubTodos(subTodos, todoLi) {
    var subTodosUl = document.createElement('ul');
