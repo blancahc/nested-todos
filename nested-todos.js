@@ -1,5 +1,6 @@
-//WHAT TO DO NEXT:
-//fix toggleAll event Listener
+//12-6 (Friday) - Successfully modified my addSubTodos() function so that it adds any level of subtodos under the right todo.
+  //Also, successfully modified my deleteTodos() function so that it deletes the correct todo(s).
+  //successfully modified functions related to edit todos.
 var todos = [];
 var storage = JSON.parse(localStorage.getItem("current-todos"));
 if(storage.length > 0){
@@ -11,29 +12,34 @@ function addTodo(todoText) {
   displayTodos();
 }
 function addSubTodo(element, text){
-    var whereToAddTodo = whereToAdd(element);
-    whereToAddTodo = eval(whereToAddTodo);
-    if(!whereToAddTodo.subTodos) {
-      whereToAddTodo.subTodos = [];
+    //to "trace" where to add subtodo by running whereToModify
+    var trace = '';
+    //whereToModify() takes + button clicked and gets path to know what todo/subtodo to modifiy.
+    trace = whereToModify(trace, element);
+    trace = eval(trace);
+    if(!trace.subTodos) {
+      trace.subTodos = [];
     }
-    whereToAddTodo.subTodos.push({todoText: text, completed: false}); 
+    trace.subTodos.push({todoText: text, completed: false}); 
     localStorage.setItem("current-todos", JSON.stringify(todos));
     displayTodos();
   }
-  function whereToAdd(element) {
+  function whereToModify(trace, element) {
     //base case, if no className
-    var trace = [];
-    var li = element.parentElement;
-    if(!li.className){
-      trace.unshift(`todos[${li.id}]`);
+    var parent = element.parentElement;
+    if(!parent.className){
+      return trace = `todos[${parent.id}]`+ trace;
     }
-    // if(element.parentElement.className === 'sub-todo') {
-    //   trace = whereToAdd(element);
-    // }
-    //add recursion for if parentElement does have a class name of sub-todo
-    return trace.join('.');
+    trace = `.subTodos[${parent.id}]` + trace;
+    if(parent.className === 'sub-todo') {
+      element = parent.parentElement;
+      return trace = whereToModify(trace, element);
+    }
+    if(parent.className ==='sub-todoUl') {
+      element = parent.parentElement;
+      return trace = whereToModify(trace, element);
+    }
   }
-
 function checkIfAllComplete() {
   countCompleted = 0;
  for (var i = 0; i < todos.length; i++){
@@ -51,17 +57,24 @@ function checkToggleAllIfAllCompleted() {
   }
   }
 
-function deleteTodo(position) {
-  todos.splice(position, 1);
+function deleteTodo(element, position) {
+  var trace = '';
+  if (!element.parentElement.className){
+    trace = 'todos';
+  } else {
+    trace = whereToModify(trace, element);
+    trace = trace.slice(0, -3)
+  }
+  trace = eval(trace);
+  trace.splice(position, 1);
   localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
-function editTodo(position, input) {
-  todos[position].todoText = input;
+function editTodo(trace, input) {
+  trace.todoText = input;
   localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
-
 function displayTodos() {
   var todosUl = document.querySelector('ul');
   todosUl.innerHTML = '';
@@ -82,32 +95,45 @@ function displayTodos() {
       todoLi.classList.add('line-through');
       checkbox = todoLi.childNodes[0];
       checkbox.checked = true;
-    }
+    } 
     if(todo.subTodos && todo.subTodos.length > 0){
-      todo.subTodos.forEach(function(todo, position){
-        var todoLi = document.createElement('li');
-        todoLi.className= 'sub-todo';
-        var todoLabel = document.createElement('label');
-        todoLabel.innerText = todo.todoText + ' ';
-        todoLi.id = position;
-        todoLi.appendChild(createCheckbox());
-        todoLi.appendChild(todoLabel);
-        todoLi.appendChild(createDeleteButton());
-        todoLi.appendChild(createEditButton());
-        todoLi.appendChild(createAddSubTodoButton());
-        todoLi.appendChild(createEditInputField());
-        todoLi.appendChild(createSubTodoInputField());
-        todosUl.appendChild(todoLi);
-        if(todo.completed === true){
-          todoLi.classList.add('line-through');
-          checkbox = todoLi.childNodes[0];
-          checkbox.checked = true;
-        }
-          })
+      var subTodos = todo.subTodos
+      displaySubTodos(subTodos, todoLi);
     }
   })
 }
-
+ function displaySubTodos(subTodos, todoLi) {
+   var subTodosUl = document.createElement('ul');
+   subTodosUl.className = 'sub-todoUl';
+   todoLi.appendChild(subTodosUl);
+   subTodos.forEach(function(todo, position){
+    var subTodoLi = document.createElement('li');
+    subTodoLi .className= 'sub-todo';
+    var todoLabel = document.createElement('label');
+    todoLabel.innerText = todo.todoText + ' ';
+    subTodoLi.id = position;
+    subTodoLi.appendChild(createCheckbox());
+    subTodoLi.appendChild(todoLabel);
+    subTodoLi.appendChild(createDeleteButton());
+    subTodoLi.appendChild(createEditButton());
+    subTodoLi.appendChild(createAddSubTodoButton());
+    subTodoLi.appendChild(createEditInputField());
+    subTodoLi.appendChild(createSubTodoInputField());
+    subTodosUl.appendChild(subTodoLi);
+    if(todo.completed === true){
+      subTodoLi.classList.add('line-through');
+      checkbox = subTodoLi.childNodes[0];
+      checkbox.checked = true;
+    }
+    if(todo.subTodos && todo.subTodos.length > 0){
+      subTodos = todo.subTodos;
+      todoLi = subTodoLi;
+      return displaySubTodos(subTodos, todoLi);
+    } else {
+      return;
+    }
+      })
+ }
 //Create buttons and input field for each todo
 function createCheckbox() {
   var todoCheckbox = document.createElement('input');
@@ -144,7 +170,7 @@ function createSubTodoInputField() {
   var inputfield = document.createElement('input');
   inputfield.type = 'text';
   inputfield.className = 'subTodoInput';
-  inputfield.placeholder = 'Type something and hit `Enter`'
+  inputfield.placeholder = 'Type something and hit `Enter` to save'
   inputfield.style.display = 'none';
   return inputfield;
 }
@@ -160,10 +186,13 @@ editTextInput.addEventListener('keyup', function(event){
     }  
   }
 });
-function clickedEditTodo(id){
-  var li = document.getElementById(id);
+function clickedEditTodo(element){
+  var li = element.parentElement;
   var input = li.childNodes[5];
-  var todoText = todos[id].todoText;
+  var trace = '';
+  trace = whereToModify(trace, element);
+  trace = eval(trace);
+  var todoText = trace.todoText;
   input.value = todoText;
   input.style.display='block';
   input.style.width = '300px';
@@ -175,12 +204,12 @@ function clickedEditTodo(id){
     if(event.code === 'Enter'){
       var trimedInputText = input.value.trim();
       if(trimedInputText.length > 0){
-        editTodo(id, trimedInputText);
+        editTodo(trace, trimedInputText);
         input.value = '';
       }  
     }
   }));
-  if(todos[id].completed === true){
+  if(trace.completed === true){
     checkbox = li.childNodes[0];
     checkbox.checked = true;
   }
@@ -192,13 +221,13 @@ function clickedAddSubTodo(element){
   input.style.width = '300px';
   input.focus();
   if(input.addEventListener('blur', function (event){
+    input.value = '';
     input.style.display = 'none';
   }));
   if(input.addEventListener('keyup', function (event){
     if(event.code === 'Enter'){
       var trimedInputText = input.value.trim();
       if(trimedInputText.length > 0){
-        //add function here
         addSubTodo(element, trimedInputText);
         input.value = '';
       }  
@@ -222,22 +251,16 @@ function clickedCheckbox(id){
   }));
   
 }
-
 var todosUl = document.getElementById('display-todos');
 todosUl.addEventListener('click', function(event) {
- //get element that was clicked
  var elementClicked= event.target
- //check if elementClicked is a delete button
  if(elementClicked.className === 'deleteButton'){
-   //run deleteTodo()
-  deleteTodo(parseInt(elementClicked.parentNode.id));
+  deleteTodo(elementClicked, (parseInt(elementClicked.parentNode.id)));
  }
- //check if elementClicked is an edit button
  if(elementClicked.className === 'editButton') {
-  clickedEditTodo(elementClicked.parentNode.id);
+  clickedEditTodo(elementClicked);
  }
  if(elementClicked.className === 'addSubTodoButton'){
-  // clickedAddSubTodo(elementClicked.parentNode.id);
   clickedAddSubTodo(elementClicked);
  } 
  if(elementClicked.className === 'checkbox') {
@@ -246,7 +269,6 @@ todosUl.addEventListener('click', function(event) {
 });
 var toggleAllCheckbox = document.getElementById('toggle-all');
 toggleAllCheckbox.addEventListener('click', function() {
-  //first check if the box is checked
   if(this.checked){
     var check = checkIfAllComplete();
     if(check === todos.length){
