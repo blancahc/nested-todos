@@ -1,6 +1,3 @@
-//12-6 (Friday) - Successfully modified my addSubTodos() function so that it adds any level of subtodos under the right todo.
-  //Also, successfully modified my deleteTodos() function so that it deletes the correct todo(s).
-  //successfully modified functions related to edit todos.
 var todos = [];
 var storage = JSON.parse(localStorage.getItem("current-todos"));
 if(storage.length > 0){
@@ -93,7 +90,8 @@ function displayTodos() {
     todoLi.appendChild(createSubTodoInputField());
     todosUl.appendChild(todoLi);
     if(todo.completed === true){
-      todoLi.classList.add('line-through');
+      // todoLi.classList.add('line-through');
+      todoLi.childNodes[1].classList.add('line-through')
       checkbox = todoLi.childNodes[0];
       checkbox.checked = true;
     } 
@@ -122,7 +120,8 @@ function displayTodos() {
     subTodoLi.appendChild(createSubTodoInputField());
     subTodosUl.appendChild(subTodoLi);
     if(todo.completed === true){
-      subTodoLi.classList.add('line-through');
+      // subTodoLi.classList.add('line-through');
+      subTodoLi.childNodes[1].classList.add('line-through')
       checkbox = subTodoLi.childNodes[0];
       checkbox.checked = true;
     }
@@ -146,18 +145,22 @@ function createDeleteButton() {
   var deleteButton = document.createElement('button');
   deleteButton.textContent = 'x';
   deleteButton.className = 'deleteButton'
+  deleteButton.title = 'delete';
   return deleteButton;
 }
 function createEditButton() {
   var editButton = document.createElement('button');
   editButton.textContent = '...';
   editButton.className = 'editButton'
+  editButton.title = 'edit';
   return editButton;
 }
 function createAddSubTodoButton() {
   var addSubTodoButton = document.createElement('button');
   addSubTodoButton.textContent = '+';
   addSubTodoButton.className = 'addSubTodoButton';
+  addSubTodoButton.title = 'add subtodo';
+
   return addSubTodoButton;
 }
 function createEditInputField() {
@@ -256,43 +259,16 @@ function clickedCheckbox(element){
     if(this.checked) {
       whatTodo.completed = true;
       localStorage.setItem("current-todos", JSON.stringify(todos));
-      li.classList.add('line-through');
-      var lis = li.getElementsByTagName("LI");
-      for (var i = 0; i < lis.length; i++){
-        var whatTodo = '';
-        var element = lis[i].childNodes[0];
-        whatTodo = whereToModify(whatTodo, element);
-        whatTodo = eval(whatTodo);
-        whatTodo.completed = true;
-        localStorage.setItem("current-todos", JSON.stringify(todos));
-        lis[i].classList.add('line-through');
-      }
+      li.childNodes[1].classList.add('line-through');
     } else {
       whatTodo.completed = false;
       localStorage.setItem("current-todos", JSON.stringify(todos));
-      li.classList.remove('line-through');
+      li.childNodes[1].classList.remove('line-through');
     }
     checkToggleAllIfAllCompleted();
   }));
   
 }
-// function clickedCheckbox(id){
-//   var li = document.getElementById(id);
-//   var checkbox = li.childNodes[0];
-//   if(checkbox.addEventListener('change', function(){
-//     if(this.checked) {
-//       todos[id].completed = true;
-//       localStorage.setItem("current-todos", JSON.stringify(todos));
-//       li.classList.add('line-through');
-//     } else {
-//       todos[id].completed = false;
-//       localStorage.setItem("current-todos", JSON.stringify(todos));
-//       li.classList.remove('line-through');
-//     }
-//     checkToggleAllIfAllCompleted();
-//   }));
-  
-// }
 var todosUl = document.getElementById('display-todos');
 todosUl.addEventListener('click', function(event) {
  var elementClicked= event.target
