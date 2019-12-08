@@ -12,32 +12,32 @@ function addTodo(todoText) {
   displayTodos();
 }
 function addSubTodo(element, text){
-    //to "trace" where to add subtodo by running whereToModify
-    var trace = '';
+    //to "whatTodo" where to add subtodo by running whereToModify
+    var whatTodo = '';
     //whereToModify() takes + button clicked and gets path to know what todo/subtodo to modifiy.
-    trace = whereToModify(trace, element);
-    trace = eval(trace);
-    if(!trace.subTodos) {
-      trace.subTodos = [];
+    whatTodo = whereToModify(whatTodo, element);
+    whatTodo = eval(whatTodo);
+    if(!whatTodo.subTodos) {
+      whatTodo.subTodos = [];
     }
-    trace.subTodos.push({todoText: text, completed: false}); 
+    whatTodo.subTodos.push({todoText: text, completed: false}); 
     localStorage.setItem("current-todos", JSON.stringify(todos));
     displayTodos();
   }
-  function whereToModify(trace, element) {
+  function whereToModify(whatTodo, element) {
     //base case, if no className
     var parent = element.parentElement;
-    if(!parent.className){
-      return trace = `todos[${parent.id}]`+ trace;
+    if(parent.classList.contains('top-todo')){
+      return whatTodo = `todos[${parent.id}]`+ whatTodo;
     }
-    trace = `.subTodos[${parent.id}]` + trace;
-    if(parent.className === 'sub-todo') {
+    whatTodo = `.subTodos[${parent.id}]` + whatTodo;
+    if(parent.classList.contains('sub-todo')) {
       element = parent.parentElement;
-      return trace = whereToModify(trace, element);
+      return whatTodo = whereToModify(whatTodo, element);
     }
-    if(parent.className ==='sub-todoUl') {
+    if(parent.classList.contains('sub-todoUl')) {
       element = parent.parentElement;
-      return trace = whereToModify(trace, element);
+      return whatTodo = whereToModify(whatTodo, element);
     }
   }
 function checkIfAllComplete() {
@@ -58,20 +58,20 @@ function checkToggleAllIfAllCompleted() {
   }
 
 function deleteTodo(element, position) {
-  var trace = '';
+  var whatTodo = '';
   if (!element.parentElement.className){
-    trace = 'todos';
+    whatTodo = 'todos';
   } else {
-    trace = whereToModify(trace, element);
-    trace = trace.slice(0, -3)
+    whatTodo = whereToModify(whatTodo, element);
+    whatTodo = whatTodo.slice(0, -3)
   }
-  trace = eval(trace);
-  trace.splice(position, 1);
+  whatTodo = eval(whatTodo);
+  whatTodo.splice(position, 1);
   localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
-function editTodo(trace, input) {
-  trace.todoText = input;
+function editTodo(whatTodo, input) {
+  whatTodo.todoText = input;
   localStorage.setItem("current-todos", JSON.stringify(todos));
   displayTodos();
 }
@@ -83,6 +83,7 @@ function displayTodos() {
     var todoLabel = document.createElement('label');
     todoLabel.innerText = todo.todoText + ' ';
     todoLi.id = position;
+    todoLi.className = 'top-todo';
     todoLi.appendChild(createCheckbox());
     todoLi.appendChild(todoLabel);
     todoLi.appendChild(createDeleteButton());
@@ -143,13 +144,13 @@ function createCheckbox() {
 }
 function createDeleteButton() {
   var deleteButton = document.createElement('button');
-  deleteButton.textContent = 'X';
+  deleteButton.textContent = 'x';
   deleteButton.className = 'deleteButton'
   return deleteButton;
 }
 function createEditButton() {
   var editButton = document.createElement('button');
-  editButton.textContent = 'Edit';
+  editButton.textContent = '...';
   editButton.className = 'editButton'
   return editButton;
 }
@@ -188,28 +189,38 @@ editTextInput.addEventListener('keyup', function(event){
 });
 function clickedEditTodo(element){
   var li = element.parentElement;
+  li.childNodes[0].style.display= 'none';
+  li.childNodes[1].style.display= 'none';
+  li.childNodes[2].style.display= 'none';
+  li.childNodes[3].style.display= 'none';
+  li.childNodes[4].style.display= 'none';
   var input = li.childNodes[5];
-  var trace = '';
-  trace = whereToModify(trace, element);
-  trace = eval(trace);
-  var todoText = trace.todoText;
+  var whatTodo = '';
+  whatTodo = whereToModify(whatTodo, element);
+  whatTodo = eval(whatTodo);
+  var todoText = whatTodo.todoText;
   input.value = todoText;
   input.style.display='block';
   input.style.width = '300px';
   input.focus();
   if(input.addEventListener('blur', function (event){
     input.style.display = 'none';
+    li.childNodes[0].style.display= 'inline-block';
+    li.childNodes[1].style.display= 'inline-block';
+    li.childNodes[2].style.display= 'inline-block';
+    li.childNodes[3].style.display= 'inline-block';
+    li.childNodes[4].style.display= 'inline-block';
   }));
   if(input.addEventListener('keyup', function (event){
     if(event.code === 'Enter'){
       var trimedInputText = input.value.trim();
       if(trimedInputText.length > 0){
-        editTodo(trace, trimedInputText);
+        editTodo(whatTodo, trimedInputText);
         input.value = '';
       }  
     }
   }));
-  if(trace.completed === true){
+  if(whatTodo.completed === true){
     checkbox = li.childNodes[0];
     checkbox.checked = true;
   }
@@ -234,16 +245,30 @@ function clickedAddSubTodo(element){
     }
   }));
 };
-function clickedCheckbox(id){
-  var li = document.getElementById(id);
+function clickedCheckbox(element){
+  var li = element.parentElement;
   var checkbox = li.childNodes[0];
-  if(checkbox.addEventListener('change', function(){
+  if(checkbox.addEventListener('change', function(event){
+    element = event.target;
+    var whatTodo = '';
+    whatTodo = whereToModify(whatTodo, element);
+    whatTodo = eval(whatTodo);
     if(this.checked) {
-      todos[id].completed = true;
+      whatTodo.completed = true;
       localStorage.setItem("current-todos", JSON.stringify(todos));
       li.classList.add('line-through');
+      var lis = li.getElementsByTagName("LI");
+      for (var i = 0; i < lis.length; i++){
+        var whatTodo = '';
+        var element = lis[i].childNodes[0];
+        whatTodo = whereToModify(whatTodo, element);
+        whatTodo = eval(whatTodo);
+        whatTodo.completed = true;
+        localStorage.setItem("current-todos", JSON.stringify(todos));
+        lis[i].classList.add('line-through');
+      }
     } else {
-      todos[id].completed = false;
+      whatTodo.completed = false;
       localStorage.setItem("current-todos", JSON.stringify(todos));
       li.classList.remove('line-through');
     }
@@ -251,6 +276,23 @@ function clickedCheckbox(id){
   }));
   
 }
+// function clickedCheckbox(id){
+//   var li = document.getElementById(id);
+//   var checkbox = li.childNodes[0];
+//   if(checkbox.addEventListener('change', function(){
+//     if(this.checked) {
+//       todos[id].completed = true;
+//       localStorage.setItem("current-todos", JSON.stringify(todos));
+//       li.classList.add('line-through');
+//     } else {
+//       todos[id].completed = false;
+//       localStorage.setItem("current-todos", JSON.stringify(todos));
+//       li.classList.remove('line-through');
+//     }
+//     checkToggleAllIfAllCompleted();
+//   }));
+  
+// }
 var todosUl = document.getElementById('display-todos');
 todosUl.addEventListener('click', function(event) {
  var elementClicked= event.target
@@ -264,7 +306,8 @@ todosUl.addEventListener('click', function(event) {
   clickedAddSubTodo(elementClicked);
  } 
  if(elementClicked.className === 'checkbox') {
-   clickedCheckbox(elementClicked.parentNode.id)
+  //  clickedCheckbox(elementClicked.parentNode.id);
+  clickedCheckbox(elementClicked);
  }
 });
 var toggleAllCheckbox = document.getElementById('toggle-all');
