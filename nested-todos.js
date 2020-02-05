@@ -1,6 +1,6 @@
 var todos = [];
 var storage = JSON.parse(localStorage.getItem("current-todos"));
-if(storage.length > 0){
+if(storage && storage.length > 0){
   todos = storage;
 };
 function addTodo(todoText) {
